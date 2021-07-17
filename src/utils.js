@@ -60,8 +60,37 @@ const getMenuConfig = () => [
   }
 ];
 
+const makeInline = (news, url) => news?.map((element) => 
+  ({
+    type: 'article',
+    id: element['noticia.id'].toString(),
+    title: element['noticia.titulo'],
+    thumb_url: `${url}/public/${element['noticia.imagenes']}`,
+    description: element['noticia.contenido'].substr(0, 300),
+    url: element['noticia.url'],  
+    input_message_content: {
+      message_text: generarDescripcion(
+        element['noticia.titulo'],
+        element['noticia.url'],
+        element['noticia.imagenes'],
+        element['noticia.contenido'].substr(0, 300),
+      ),
+      parse_mode: 'HTML',
+      disable_web_page_preview: false,
+    },
+  })
+);
+
+const generarDescripcion = (titulo, link, imagen, descripcion) => {
+  let text = `<a href="${imagen}">&#8205;</a>`;
+  text += `<a href="${link}">${titulo}</a>\n`;
+  text += String(descripcion);
+  return text;
+};
+
 module.exports = {
   getText,
   makeHtml,
   getMenuConfig,
+  makeInline,
 };

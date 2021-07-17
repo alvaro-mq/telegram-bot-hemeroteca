@@ -1,11 +1,11 @@
 const { Telegraf } = require('telegraf');
 
 const { getNews } = require('./src/hemeroteca.service');
-const { getText, makeHtml, getMenuConfig } = require('./src/utils');
+const { getText, makeHtml, getMenuConfig, makeInline } = require('./src/utils');
 
 require('dotenv').config();
 
-const { TELEGRAM_TOKEN } = process.env;
+const { TELEGRAM_TOKEN, URL_HEMEROTECA } = process.env;
 const menu = getMenuConfig();
 
 (async () => {
@@ -68,6 +68,14 @@ const menu = getMenuConfig();
       ctx.reply('No se encontraron resultados.');
     }
   };
+
+  bot.on('inline_query', async (ctx) => {
+    const { query } = ctx.inlineQuery;
+    if (query.length > 2) {
+      const result = await getNews(query);
+      ctx.answerInlineQuery(makeInline(result, URL_HEMEROTECA));
+    }
+  });
 
   await bot.launch();
 })();
