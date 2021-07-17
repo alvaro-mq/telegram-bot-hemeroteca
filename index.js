@@ -1,10 +1,12 @@
 const { Telegraf } = require('telegraf');
 
 const { getNews } = require('./src/hemeroteca.service');
+const { getText, makeHtml, getMenuConfig } = require('./src/utils');
 
 require('dotenv').config();
 
 const { TELEGRAM_TOKEN } = process.env;
+const menu = getMenuConfig();
 
 (async () => {
   const bot = new Telegraf(TELEGRAM_TOKEN);
@@ -35,83 +37,25 @@ const { TELEGRAM_TOKEN } = process.env;
       ctx.reply('No se encontraron resultados.');
     }
   });
-
-  const getText = (ctx) => {
-    let text = ctx.update.message.text.split(' ');
-    if (text.length > 1) {
-      text = ctx.update.message.text.split(' ')[1].trim();
-    } else {
-      text = null;
-    }
-    return text;
-  }
   
   bot.hears('periodicos', async (ctx) => {
     const message = `Genial, aca tienes una lista de periodicos que puedes consultar.`;
     ctx.deleteMessage();
     bot.telegram.sendMessage(ctx.chat.id, message, {
-        reply_markup: {
-            inline_keyboard: [
-                [{
-                        text: 'LOS TIEMPOS',
-                        callback_data: 'losTiempos'
-                    },
-                    {
-                        text: 'PAGINA SIETE',
-                        callback_data: 'paginaSiete'
-                    },
-                    {
-                      text: 'LA PRENSA',
-                      callback_data: 'laPrensa'
-                    },
-                ],
-                [
-                  {
-                    text: 'OPINION',
-                    callback_data: 'opinion'
-                  },
-                  {
-                    text: 'EL DIA',
-                    callback_data: 'elDia'
-                  },
-                  {
-                    text: 'ERBOL',
-                    callback_data: 'erbol'
-                  }
-                ],
-            ]
-        }
+      reply_markup: {
+        inline_keyboard: [
+          menu.slice(0, menu.length/2),
+          menu.slice(menu.length/2, menu.length),
+        ]
+      }
     })
   });
 
-  bot.action('losTiempos', async (ctx) => {
-    const newsPaperId = 7;
-    await getNewsPaper(ctx, newsPaperId);
-  });
-
-  bot.action('paginaSiete', async (ctx) => {
-    const newsPaperId = 6;
-    await getNewsPaper(ctx, newsPaperId);
-  });
-
-  bot.action('laPrensa', async (ctx) => {
-    const newsPaperId = 3;
-    await getNewsPaper(ctx, newsPaperId);
-  });
-
-  bot.action('opinion', async (ctx) => {
-    const newsPaperId = 8;
-    await getNewsPaper(ctx, newsPaperId);
-  });
-
-  bot.action('elDia', async (ctx) => {
-    const newsPaperId = 9;
-    await getNewsPaper(ctx, newsPaperId);
-  });
-
-  bot.action('erbol', async (ctx) => {
-    const newsPaperId = 11;
-    await getNewsPaper(ctx, newsPaperId);
+  menu.forEach((m) => {
+    bot.action(m.callback_data, async (ctx) => {
+      const newsPaperId = m.id;
+      await getNewsPaper(ctx, newsPaperId);
+    });
   });
 
   const getNewsPaper = async (ctx, newsPaperId) => {
@@ -123,25 +67,6 @@ const { TELEGRAM_TOKEN } = process.env;
     } else {
       ctx.reply('No se encontraron resultados.');
     }
-  };
-
-  const makeHtml = (news) => {
-    let html = '';
-    const title = `<b>${news['noticia.titulo']}</b>`;
-    html = title;
-    if (news['noticia.subtitulo'] !== 'S/N') {
-      const subtitle = `<i>${news['noticia.subtitulo']}</i>`;
-      html = `${html}
-        ${subtitle}`;
-    }
-    const contents = `${news['noticia.contenido']}`.slice(0, 500);
-    html = `${html}
-    
-    ${contents}...<b>Ver mas</b>`;
-    const link = `<a href="${news['noticia.url']}">${news['noticia.url']}</a>`;
-    html = `${html}
-    ${link}`
-    return html;
   };
 
   await bot.launch();
