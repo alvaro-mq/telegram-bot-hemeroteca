@@ -60,8 +60,8 @@ const menu = getMenuConfig();
 
   const getNewsPaper = async (ctx, newsPaperId) => {
     const response = await getNews(null, newsPaperId);
-    if (response) {
-      response.forEach((response) => {
+    if (response.datos && response.finalizado) {
+      response.datos.forEach((response) => {
         ctx.replyWithHTML(makeHtml(response));
       });
     } else {
