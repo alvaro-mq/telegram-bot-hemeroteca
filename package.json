@@ -4,6 +4,7 @@
   "description": "Bot para hemeroteca",
   "main": "index.js",
   "scripts": {
+    "start": "node index",
     "dev": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -11,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/alvaro-mq/telegram-bot-hemeroteca.git"
   },
-  "author": "",
+  "author": "alvaro-mq",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/alvaro-mq/telegram-bot-hemeroteca/issues"
